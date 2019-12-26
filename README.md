@@ -14,7 +14,7 @@ Scenario :
 - Display RX data under UART_Loop_Process
 
 - may use teraterm with M031 EVM (VCP) , to input data as below ,
-https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/terminal operation.jpg
+https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/terminal_operation.jpg
 
 2. Use SPI0 (PA0 : SPI0_MOSI , PA1 : SPI0_MISO , PA2 : SPI0_CLK , PA3 : SPI0_SS) , to transmit and receive , with SPI interrupt
 
@@ -23,7 +23,7 @@ https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/terminal operat
 - Display RX under SPI_Master_Loop_Process
 
 - below is SPI waveform for reference 
-https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/SPI scope.jpg
+https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/SPI_scope.jpg
 
 3. Use internal flash to emulate EEPROM
 
@@ -36,6 +36,6 @@ https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/SPI scope.jpg
 - Under Emulate_EEPROM_Process , write data in order and read back according to address and send UART string
 
 - below is EEPROM write and read data log for reference 
-https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/emulate eeprom .jpg
+https://github.com/released/M031BSP_SPI_UART/SampleCode/Template/emulate_eeprom.jpg
 
 
