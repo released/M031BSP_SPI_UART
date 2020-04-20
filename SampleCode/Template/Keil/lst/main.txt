@@ -5,56 +5,58 @@
                           AREA ||i.Emulate_EEPROM||, CODE, READONLY, ALIGN=2
 
                   Emulate_EEPROM PROC
-;;;185    
-;;;186    void Emulate_EEPROM(void)
-000000  b510              PUSH     {r4,lr}
-;;;187    {
-;;;188    
-;;;189        /* Enable FMC ISP function */
-;;;190        FMC_Open();
-000002  f7fffffe          BL       FMC_Open
 ;;;191    
-;;;192        if (set_data_flash_base(DATA_FLASH_OFFSET) < 0)
-000006  200f              MOVS     r0,#0xf
-000008  0280              LSLS     r0,r0,#10
-00000a  f7fffffe          BL       set_data_flash_base
-00000e  2800              CMP      r0,#0
-000010  da02              BGE      |L1.24|
-;;;193        {
-;;;194            printf("Failed to set Data Flash base address!\r\n");
-000012  a005              ADR      r0,|L1.40|
-000014  f7fffffe          BL       __2printf
-                  |L1.24|
-;;;195        }
-;;;196    
-;;;197    	/* Test Init_EEPROM() */
-;;;198    	Init_EEPROM(DATA_FLASH_AMOUNT, DATA_FLASH_PAGE);
-000018  2102              MOVS     r1,#2
-00001a  2010              MOVS     r0,#0x10
-00001c  f7fffffe          BL       Init_EEPROM
-;;;199    	Search_Valid_Page();	
-000020  f7fffffe          BL       Search_Valid_Page
-;;;200    }
-000024  bd10              POP      {r4,pc}
-;;;201    
+;;;192    void Emulate_EEPROM(void)
+000000  b510              PUSH     {r4,lr}
+;;;193    {
+;;;194        SYS_UnlockReg();
+000002  f7fffffe          BL       SYS_UnlockReg
+;;;195    
+;;;196        /* Enable FMC ISP function */
+;;;197        FMC_Open();
+000006  f7fffffe          BL       FMC_Open
+;;;198    
+;;;199        if (set_data_flash_base(DATA_FLASH_OFFSET) < 0)
+00000a  200f              MOVS     r0,#0xf
+00000c  0280              LSLS     r0,r0,#10
+00000e  f7fffffe          BL       set_data_flash_base
+000012  2800              CMP      r0,#0
+000014  da02              BGE      |L1.28|
+;;;200        {
+;;;201            printf("Failed to set Data Flash base address!\r\n");
+000016  a005              ADR      r0,|L1.44|
+000018  f7fffffe          BL       __2printf
+                  |L1.28|
+;;;202        }
+;;;203    
+;;;204    	/* Test Init_EEPROM() */
+;;;205    	Init_EEPROM(DATA_FLASH_AMOUNT, DATA_FLASH_PAGE);
+00001c  2102              MOVS     r1,#2
+00001e  2010              MOVS     r0,#0x10
+000020  f7fffffe          BL       Init_EEPROM
+;;;206    	Search_Valid_Page();	
+000024  f7fffffe          BL       Search_Valid_Page
+;;;207    }
+000028  bd10              POP      {r4,pc}
+;;;208    
                           ENDP
 
-000026  0000              DCW      0x0000
-                  |L1.40|
-000028  4661696c          DCB      "Failed to set Data Flash base address!\r\n",0
-00002c  65642074
-000030  6f207365
-000034  74204461
-000038  74612046
-00003c  6c617368
-000040  20626173
-000044  65206164
-000048  64726573
-00004c  73210d0a
-000050  00      
-000051  00                DCB      0
-000052  00                DCB      0
-000053  00                DCB      0
+00002a  0000              DCW      0x0000
+                  |L1.44|
+00002c  4661696c          DCB      "Failed to set Data Flash base address!\r\n",0
+000030  65642074
+000034  6f207365
+000038  74204461
+00003c  74612046
+000040  6c617368
+000044  20626173
+000048  65206164
+00004c  64726573
+000050  73210d0a
+000054  00      
+000055  00                DCB      0
+000056  00                DCB      0
+000057  00                DCB      0
 
                           AREA ||i.Emulate_EEPROM_Process||, CODE, READONLY, ALIGN=2
 
@@ -71,14 +73,14 @@
 000002  b08a              SUB      sp,sp,#0x28
 ;;;151    	static uint8_t incr_base = 0;
 ;;;152    	uint8_t cnt = 0;
-000004  2000              MOVS     r0,#0
-000006  4669              MOV      r1,sp
-000008  7008              STRB     r0,[r1,#0]
+000004  2600              MOVS     r6,#0
+000006  4668              MOV      r0,sp
+000008  7006              STRB     r6,[r0,#0]
 ;;;153    	uint8_t i = 0;
-00000a  4604              MOV      r4,r0
+00000a  4634              MOV      r4,r6
 ;;;154    	uint8_t string[] = "Emulate_EEPROM_Process finish !" ; 
 00000c  2220              MOVS     r2,#0x20
-00000e  a122              ADR      r1,|L2.152|
+00000e  a123              ADR      r1,|L2.156|
 000010  a801              ADD      r0,sp,#4
 000012  f7fffffe          BL       __aeabi_memcpy4
 ;;;155    
@@ -86,7 +88,7 @@
 000016  2004              MOVS     r0,#4
 000018  f7fffffe          BL       is_flag_set
 00001c  2800              CMP      r0,#0
-00001e  d038              BEQ      |L2.146|
+00001e  d03b              BEQ      |L2.152|
 ;;;157    	{
 ;;;158    		set_flag(flag_Record_Data , DISABLE);
 000020  2100              MOVS     r1,#0
@@ -96,7 +98,7 @@
 ;;;160    		for (i = 0 ; i < DATA_FLASH_AMOUNT; i ++)
 ;;;161    		{
 ;;;162    			Write_Data(i%DATA_FLASH_AMOUNT, incr_base + (cnt++) );
-000028  4d23              LDR      r5,|L2.184|
+000028  4d24              LDR      r5,|L2.188|
                   |L2.42|
 00002a  466a              MOV      r2,sp
 00002c  7929              LDRB     r1,[r5,#4]  ; incr_base
@@ -114,95 +116,104 @@
 000046  d3f0              BCC      |L2.42|
 ;;;163    		}
 ;;;164    
-;;;165    		/* Test Read_Data() */
-;;;166    
-;;;167    		for (i = 0 ; i < DATA_FLASH_AMOUNT; i ++)
-000048  2400              MOVS     r4,#0
-;;;168    		{
-;;;169    
-;;;170    			Read_Data(i%DATA_FLASH_AMOUNT, &cnt );
-;;;171    			printf("0x%2X , ", cnt);
-;;;172    			if ((i+1)%8 ==0)
-00004a  2601              MOVS     r6,#1
-00004c  0776              LSLS     r6,r6,#29
-                  |L2.78|
-00004e  0720              LSLS     r0,r4,#28             ;170
-000050  0f00              LSRS     r0,r0,#28             ;170
-000052  4669              MOV      r1,sp                 ;170
-000054  f7fffffe          BL       Read_Data
-000058  4668              MOV      r0,sp                 ;171
-00005a  7801              LDRB     r1,[r0,#0]            ;171
-00005c  a017              ADR      r0,|L2.188|
-00005e  f7fffffe          BL       __2printf
-000062  0760              LSLS     r0,r4,#29
-000064  42f0              CMN      r0,r6
-000066  d102              BNE      |L2.110|
-;;;173    			{
-;;;174    				printf("\r\n");
-000068  a017              ADR      r0,|L2.200|
-00006a  f7fffffe          BL       __2printf
-                  |L2.110|
-00006e  1c64              ADDS     r4,r4,#1
-000070  b2e4              UXTB     r4,r4                 ;167
-000072  2c10              CMP      r4,#0x10              ;167
-000074  d3eb              BCC      |L2.78|
-;;;175    			}
-;;;176    
-;;;177    		}
-;;;178    
-;;;179    		incr_base += 0x10;
-000076  7928              LDRB     r0,[r5,#4]  ; incr_base
-000078  3010              ADDS     r0,r0,#0x10
-00007a  7128              STRB     r0,[r5,#4]
-;;;180    		
-;;;181    		UART_Write(UART0 , string , strlen((char*)string) );
-00007c  a801              ADD      r0,sp,#4
-00007e  f7fffffe          BL       strlen
-000082  4602              MOV      r2,r0
-000084  a901              ADD      r1,sp,#4
-000086  4811              LDR      r0,|L2.204|
-000088  f7fffffe          BL       UART_Write
-;;;182    		printf("\r\n\r\n");
-00008c  a010              ADR      r0,|L2.208|
-00008e  f7fffffe          BL       __2printf
-                  |L2.146|
-;;;183    	}
-;;;184    }
-000092  b00a              ADD      sp,sp,#0x28
-000094  bd70              POP      {r4-r6,pc}
-;;;185    
+;;;165    		/* Disable FMC ISP function */
+;;;166    		FMC_Close();
+000048  f7fffffe          BL       FMC_Close
+00004c  481c              LDR      r0,|L2.192|
+00004e  6006              STR      r6,[r0,#0]
+;;;167    
+;;;168    		/* Lock protected registers */
+;;;169    		SYS_LockReg();
+;;;170    
+;;;171    		/* Test Read_Data() */
+;;;172    
+;;;173    		for (i = 0 ; i < DATA_FLASH_AMOUNT; i ++)
+000050  2400              MOVS     r4,#0
+;;;174    		{
+;;;175    
+;;;176    			Read_Data(i%DATA_FLASH_AMOUNT, &cnt );
+;;;177    			printf("0x%2X , ", cnt);
+;;;178    			if ((i+1)%8 ==0)
+000052  0546              LSLS     r6,r0,#21
+                  |L2.84|
+000054  0720              LSLS     r0,r4,#28             ;176
+000056  0f00              LSRS     r0,r0,#28             ;176
+000058  4669              MOV      r1,sp                 ;176
+00005a  f7fffffe          BL       Read_Data
+00005e  4668              MOV      r0,sp                 ;177
+000060  7801              LDRB     r1,[r0,#0]            ;177
+000062  a018              ADR      r0,|L2.196|
+000064  f7fffffe          BL       __2printf
+000068  0760              LSLS     r0,r4,#29
+00006a  42f0              CMN      r0,r6
+00006c  d102              BNE      |L2.116|
+;;;179    			{
+;;;180    				printf("\r\n");
+00006e  a018              ADR      r0,|L2.208|
+000070  f7fffffe          BL       __2printf
+                  |L2.116|
+000074  1c64              ADDS     r4,r4,#1
+000076  b2e4              UXTB     r4,r4                 ;173
+000078  2c10              CMP      r4,#0x10              ;173
+00007a  d3eb              BCC      |L2.84|
+;;;181    			}
+;;;182    
+;;;183    		}
+;;;184    
+;;;185    		incr_base += 0x10;
+00007c  7928              LDRB     r0,[r5,#4]  ; incr_base
+00007e  3010              ADDS     r0,r0,#0x10
+000080  7128              STRB     r0,[r5,#4]
+;;;186    		
+;;;187    		UART_Write(UART0 , string , strlen((char*)string) );
+000082  a801              ADD      r0,sp,#4
+000084  f7fffffe          BL       strlen
+000088  4602              MOV      r2,r0
+00008a  a901              ADD      r1,sp,#4
+00008c  4811              LDR      r0,|L2.212|
+00008e  f7fffffe          BL       UART_Write
+;;;188    		printf("\r\n\r\n");
+000092  a011              ADR      r0,|L2.216|
+000094  f7fffffe          BL       __2printf
+                  |L2.152|
+;;;189    	}
+;;;190    }
+000098  b00a              ADD      sp,sp,#0x28
+00009a  bd70              POP      {r4-r6,pc}
+;;;191    
                           ENDP
 
-000096  0000              DCW      0x0000
-                  |L2.152|
-000098  456d756c          DCB      "Emulate_EEPROM_Process finish !",0
-00009c  6174655f
-0000a0  45455052
-0000a4  4f4d5f50
-0000a8  726f6365
-0000ac  73732066
-0000b0  696e6973
-0000b4  68202100
-                  |L2.184|
-                          DCD      ||.data||
+                  |L2.156|
+00009c  456d756c          DCB      "Emulate_EEPROM_Process finish !",0
+0000a0  6174655f
+0000a4  45455052
+0000a8  4f4d5f50
+0000ac  726f6365
+0000b0  73732066
+0000b4  696e6973
+0000b8  68202100
                   |L2.188|
-0000bc  30782532          DCB      "0x%2X , ",0
-0000c0  58202c20
-0000c4  00      
-0000c5  00                DCB      0
-0000c6  00                DCB      0
-0000c7  00                DCB      0
-                  |L2.200|
-0000c8  0d0a00            DCB      "\r\n",0
-0000cb  00                DCB      0
-                  |L2.204|
-                          DCD      0x40070000
+                          DCD      ||.data||
+                  |L2.192|
+                          DCD      0x40000100
+                  |L2.196|
+0000c4  30782532          DCB      "0x%2X , ",0
+0000c8  58202c20
+0000cc  00      
+0000cd  00                DCB      0
+0000ce  00                DCB      0
+0000cf  00                DCB      0
                   |L2.208|
-0000d0  0d0a0d0a          DCB      "\r\n\r\n",0
-0000d4  00      
-0000d5  00                DCB      0
-0000d6  00                DCB      0
-0000d7  00                DCB      0
+0000d0  0d0a00            DCB      "\r\n",0
+0000d3  00                DCB      0
+                  |L2.212|
+                          DCD      0x40070000
+                  |L2.216|
+0000d8  0d0a0d0a          DCB      "\r\n\r\n",0
+0000dc  00      
+0000dd  00                DCB      0
+0000de  00                DCB      0
+0000df  00                DCB      0
 
                           AREA ||i.GPIO_Init||, CODE, READONLY, ALIGN=2
 
@@ -228,15 +239,15 @@
                           AREA ||i.SPI0_IRQHandler||, CODE, READONLY, ALIGN=2
 
                   SPI0_IRQHandler PROC
-;;;201    
-;;;202    void SPI0_IRQHandler(void)
+;;;208    
+;;;209    void SPI0_IRQHandler(void)
 000000  b5f8              PUSH     {r3-r7,lr}
-;;;203    {
-;;;204        /* Check RX EMPTY flag */
-;;;205        while(SPI_GET_RX_FIFO_EMPTY_FLAG(SPI0) == 0)
-;;;206        {
-;;;207            /* Read RX FIFO */
-;;;208            MasterRxBuffer[spiRxDataCount++] = SPI_READ_RX(SPI0);
+;;;210    {
+;;;211        /* Check RX EMPTY flag */
+;;;212        while(SPI_GET_RX_FIFO_EMPTY_FLAG(SPI0) == 0)
+;;;213        {
+;;;214            /* Read RX FIFO */
+;;;215            MasterRxBuffer[spiRxDataCount++] = SPI_READ_RX(SPI0);
 000002  4d22              LDR      r5,|L4.140|
 000004  4e22              LDR      r6,|L4.144|
 000006  4c23              LDR      r4,|L4.148|
@@ -248,57 +259,57 @@
 000010  1c40              ADDS     r0,r0,#1
 000012  8120              STRH     r0,[r4,#8]
                   |L4.20|
-000014  6970              LDR      r0,[r6,#0x14]         ;205
-000016  05c0              LSLS     r0,r0,#23             ;205
+000014  6970              LDR      r0,[r6,#0x14]         ;212
+000016  05c0              LSLS     r0,r0,#23             ;212
 000018  d5f7              BPL      |L4.10|
-;;;209        }
-;;;210        /* Check TX FULL flag and TX data count */
-;;;211        while((SPI_GET_TX_FIFO_FULL_FLAG(SPI0) == 0) && (spiTxDataCount < MASTER_DATA_NUM))
-;;;212        {
-;;;213            /* Write to TX FIFO */
-;;;214    		#if 0
-;;;215    		printf("SPI : 0x%2X\r\n" , MasterToSlaveTestPattern[spiTxDataCount]);
-;;;216    		#endif
-;;;217            SPI_WRITE_TX(SPI0, MasterToSlaveTestPattern[spiTxDataCount++]);
+;;;216        }
+;;;217        /* Check TX FULL flag and TX data count */
+;;;218        while((SPI_GET_TX_FIFO_FULL_FLAG(SPI0) == 0) && (spiTxDataCount < MASTER_DATA_NUM))
+;;;219        {
+;;;220            /* Write to TX FIFO */
+;;;221    		#if 0
+;;;222    		printf("SPI : 0x%2X\r\n" , MasterToSlaveTestPattern[spiTxDataCount]);
+;;;223    		#endif
+;;;224            SPI_WRITE_TX(SPI0, MasterToSlaveTestPattern[spiTxDataCount++]);
 00001a  491c              LDR      r1,|L4.140|
 00001c  3910              SUBS     r1,r1,#0x10
                   |L4.30|
-00001e  6970              LDR      r0,[r6,#0x14]         ;211
-000020  0380              LSLS     r0,r0,#14             ;211
-;;;218        }
-;;;219    	
-;;;220        if(spiTxDataCount >= MASTER_DATA_NUM)
+00001e  6970              LDR      r0,[r6,#0x14]         ;218
+000020  0380              LSLS     r0,r0,#14             ;218
+;;;225        }
+;;;226    	
+;;;227        if(spiTxDataCount >= MASTER_DATA_NUM)
 000022  88e0              LDRH     r0,[r4,#6]  ; spiTxDataCount
 000024  d406              BMI      |L4.52|
-000026  2810              CMP      r0,#0x10              ;211
+000026  2810              CMP      r0,#0x10              ;218
 000028  d206              BCS      |L4.56|
-00002a  5c0a              LDRB     r2,[r1,r0]            ;217
-00002c  6232              STR      r2,[r6,#0x20]         ;217
-00002e  1c40              ADDS     r0,r0,#1              ;217
-000030  80e0              STRH     r0,[r4,#6]            ;217
+00002a  5c0a              LDRB     r2,[r1,r0]            ;224
+00002c  6232              STR      r2,[r6,#0x20]         ;224
+00002e  1c40              ADDS     r0,r0,#1              ;224
+000030  80e0              STRH     r0,[r4,#6]            ;224
 000032  e7f4              B        |L4.30|
                   |L4.52|
 000034  2810              CMP      r0,#0x10
 000036  d309              BCC      |L4.76|
                   |L4.56|
-;;;221        {
-;;;222            SPI_DisableInt(SPI0, SPI_FIFO_TXTH_INT_MASK); /* Disable TX FIFO threshold interrupt */
+;;;228        {
+;;;229            SPI_DisableInt(SPI0, SPI_FIFO_TXTH_INT_MASK); /* Disable TX FIFO threshold interrupt */
 000038  2180              MOVS     r1,#0x80
 00003a  4630              MOV      r0,r6
 00003c  f7fffffe          BL       SPI_DisableInt
-;;;223    		
-;;;224    		set_flag(flag_SPI_TX_Finish , ENABLE);
+;;;230    		
+;;;231    		set_flag(flag_SPI_TX_Finish , ENABLE);
 000040  2101              MOVS     r1,#1
 000042  4608              MOV      r0,r1
 000044  f7fffffe          BL       set_flag
-;;;225    		spiTxDataCount = 0;
+;;;232    		spiTxDataCount = 0;
 000048  2000              MOVS     r0,#0
 00004a  80e0              STRH     r0,[r4,#6]
                   |L4.76|
-;;;226        }
-;;;227    
-;;;228        /* Check the RX FIFO time-out interrupt flag */
-;;;229        if(SPI_GetIntFlag(SPI0, SPI_FIFO_RXTO_INT_MASK))
+;;;233        }
+;;;234    
+;;;235        /* Check the RX FIFO time-out interrupt flag */
+;;;236        if(SPI_GetIntFlag(SPI0, SPI_FIFO_RXTO_INT_MASK))
 00004c  2701              MOVS     r7,#1
 00004e  02bf              LSLS     r7,r7,#10
 000050  4639              MOV      r1,r7
@@ -308,45 +319,45 @@
 00005a  d105              BNE      |L4.104|
 00005c  e007              B        |L4.110|
                   |L4.94|
-;;;230        {
-;;;231            /* If RX FIFO is not empty, read RX FIFO. */
-;;;232            while(SPI_GET_RX_FIFO_EMPTY_FLAG(SPI0) == 0)
-;;;233                MasterRxBuffer[spiRxDataCount++] = SPI_READ_RX(SPI0);
+;;;237        {
+;;;238            /* If RX FIFO is not empty, read RX FIFO. */
+;;;239            while(SPI_GET_RX_FIFO_EMPTY_FLAG(SPI0) == 0)
+;;;240                MasterRxBuffer[spiRxDataCount++] = SPI_READ_RX(SPI0);
 00005e  6b30              LDR      r0,[r6,#0x30]
 000060  8922              LDRH     r2,[r4,#8]  ; spiRxDataCount
 000062  54a8              STRB     r0,[r5,r2]
 000064  1c52              ADDS     r2,r2,#1
 000066  8122              STRH     r2,[r4,#8]
                   |L4.104|
-000068  6970              LDR      r0,[r6,#0x14]         ;232
-00006a  05c0              LSLS     r0,r0,#23             ;232
+000068  6970              LDR      r0,[r6,#0x14]         ;239
+00006a  05c0              LSLS     r0,r0,#23             ;239
 00006c  d5f7              BPL      |L4.94|
                   |L4.110|
-;;;234        }
-;;;235    
-;;;236    	if (spiRxDataCount >= MASTER_DATA_NUM)
+;;;241        }
+;;;242    
+;;;243    	if (spiRxDataCount >= MASTER_DATA_NUM)
 00006e  8920              LDRH     r0,[r4,#8]  ; spiRxDataCount
 000070  2810              CMP      r0,#0x10
 000072  d309              BCC      |L4.136|
-;;;237    	{
-;;;238        	SPI_DisableInt(SPI0, SPI_FIFO_RXTO_INT_MASK);
+;;;244    	{
+;;;245        	SPI_DisableInt(SPI0, SPI_FIFO_RXTO_INT_MASK);
 000074  4639              MOV      r1,r7
 000076  4630              MOV      r0,r6
 000078  f7fffffe          BL       SPI_DisableInt
-;;;239    	
-;;;240    		set_flag(flag_SPI_RX_Finish , ENABLE);
+;;;246    	
+;;;247    		set_flag(flag_SPI_RX_Finish , ENABLE);
 00007c  2101              MOVS     r1,#1
 00007e  2000              MOVS     r0,#0
 000080  f7fffffe          BL       set_flag
-;;;241    		spiRxDataCount = 0;
+;;;248    		spiRxDataCount = 0;
 000084  2000              MOVS     r0,#0
 000086  8120              STRH     r0,[r4,#8]
                   |L4.136|
-;;;242    	}
-;;;243    	
-;;;244    }
+;;;249    	}
+;;;250    	
+;;;251    }
 000088  bdf8              POP      {r3-r7,pc}
-;;;245    
+;;;252    
                           ENDP
 
 00008a  0000              DCW      0x0000
@@ -360,11 +371,11 @@
                           AREA ||i.SPI_Master_Init||, CODE, READONLY, ALIGN=2
 
                   SPI_Master_Init PROC
-;;;299    //PA0 : SPI0_MOSI , PA1 : SPI0_MISO , PA2 : SPI0_CLK , PA3 : SPI0_SS
-;;;300    void SPI_Master_Init(void)
+;;;306    //PA0 : SPI0_MOSI , PA1 : SPI0_MISO , PA2 : SPI0_CLK , PA3 : SPI0_SS
+;;;307    void SPI_Master_Init(void)
 000000  b538              PUSH     {r3-r5,lr}
-;;;301    {
-;;;302        SPI_Open(SPI0, SPI_MASTER, SPI_MODE_0, 8, SPI_TARGET_FREQ);
+;;;308    {
+;;;309        SPI_Open(SPI0, SPI_MASTER, SPI_MODE_0, 8, SPI_TARGET_FREQ);
 000002  4807              LDR      r0,|L5.32|
 000004  4c07              LDR      r4,|L5.36|
 000006  9000              STR      r0,[sp,#0]
@@ -373,16 +384,16 @@
 00000c  2100              MOVS     r1,#0
 00000e  4620              MOV      r0,r4
 000010  f7fffffe          BL       SPI_Open
-;;;303    
-;;;304        /* Enable the automatic hardware slave select function. Select the SS pin and configure as low-active. */
-;;;305        SPI_EnableAutoSS(SPI0, SPI_SS, SPI_SS_ACTIVE_LOW);
+;;;310    
+;;;311        /* Enable the automatic hardware slave select function. Select the SS pin and configure as low-active. */
+;;;312        SPI_EnableAutoSS(SPI0, SPI_SS, SPI_SS_ACTIVE_LOW);
 000014  2200              MOVS     r2,#0
 000016  2101              MOVS     r1,#1
 000018  4620              MOV      r0,r4
 00001a  f7fffffe          BL       SPI_EnableAutoSS
-;;;306    }
+;;;313    }
 00001e  bd38              POP      {r3-r5,pc}
-;;;307    
+;;;314    
                           ENDP
 
                   |L5.32|
@@ -393,68 +404,68 @@
                           AREA ||i.SPI_Master_Loop_Process||, CODE, READONLY, ALIGN=2
 
                   SPI_Master_Loop_Process PROC
-;;;245    
-;;;246    void SPI_Master_Loop_Process(void)
+;;;252    
+;;;253    void SPI_Master_Loop_Process(void)
 000000  b570              PUSH     {r4-r6,lr}
-;;;247    {
-;;;248        uint32_t u32DataCount = 0;
-;;;249    
-;;;250    	if (is_flag_set(flag_SPI_TX_Finish))	
+;;;254    {
+;;;255        uint32_t u32DataCount = 0;
+;;;256    
+;;;257    	if (is_flag_set(flag_SPI_TX_Finish))	
 000002  2001              MOVS     r0,#1
 000004  f7fffffe          BL       is_flag_set
 000008  2400              MOVS     r4,#0
-;;;251    	{
-;;;252    		set_flag(flag_SPI_TX_Finish , DISABLE);
-;;;253    	
-;;;254        	SPI_EnableInt(SPI0, SPI_FIFO_TXTH_INT_MASK);
+;;;258    	{
+;;;259    		set_flag(flag_SPI_TX_Finish , DISABLE);
+;;;260    	
+;;;261        	SPI_EnableInt(SPI0, SPI_FIFO_TXTH_INT_MASK);
 00000a  4e0e              LDR      r6,|L6.68|
-;;;255    		spiTxDataCount = 0;
+;;;262    		spiTxDataCount = 0;
 00000c  4d0e              LDR      r5,|L6.72|
-00000e  2800              CMP      r0,#0                 ;250
+00000e  2800              CMP      r0,#0                 ;257
 000010  d008              BEQ      |L6.36|
-000012  2100              MOVS     r1,#0                 ;252
-000014  2001              MOVS     r0,#1                 ;252
+000012  2100              MOVS     r1,#0                 ;259
+000014  2001              MOVS     r0,#1                 ;259
 000016  f7fffffe          BL       set_flag
-00001a  2180              MOVS     r1,#0x80              ;254
-00001c  4630              MOV      r0,r6                 ;254
+00001a  2180              MOVS     r1,#0x80              ;261
+00001c  4630              MOV      r0,r6                 ;261
 00001e  f7fffffe          BL       SPI_EnableInt
 000022  80ec              STRH     r4,[r5,#6]
                   |L6.36|
-;;;256    	}
-;;;257    
-;;;258    	if (is_flag_set(flag_SPI_RX_Finish))	
+;;;263    	}
+;;;264    
+;;;265    	if (is_flag_set(flag_SPI_RX_Finish))	
 000024  2000              MOVS     r0,#0
 000026  f7fffffe          BL       is_flag_set
 00002a  2800              CMP      r0,#0
 00002c  d009              BEQ      |L6.66|
-;;;259    	{
-;;;260    		set_flag(flag_SPI_RX_Finish , DISABLE);
+;;;266    	{
+;;;267    		set_flag(flag_SPI_RX_Finish , DISABLE);
 00002e  2100              MOVS     r1,#0
 000030  4608              MOV      r0,r1
 000032  f7fffffe          BL       set_flag
-;;;261    
-;;;262    		#if 0
-;;;263    	    printf("rx Received data:\n");
-;;;264    	    for(u32DataCount = 0; u32DataCount < MASTER_DATA_NUM; u32DataCount++)
-;;;265    	    {
-;;;266    	        printf("%d:\t0x%X\n", u32DataCount, MasterRxBuffer[u32DataCount]);
-;;;267    	    }
-;;;268    		#endif
-;;;269    	
-;;;270        	SPI_EnableInt(SPI0, SPI_FIFO_RXTO_INT_MASK);
+;;;268    
+;;;269    		#if 0
+;;;270    	    printf("rx Received data:\n");
+;;;271    	    for(u32DataCount = 0; u32DataCount < MASTER_DATA_NUM; u32DataCount++)
+;;;272    	    {
+;;;273    	        printf("%d:\t0x%X\n", u32DataCount, MasterRxBuffer[u32DataCount]);
+;;;274    	    }
+;;;275    		#endif
+;;;276    	
+;;;277        	SPI_EnableInt(SPI0, SPI_FIFO_RXTO_INT_MASK);
 000036  2101              MOVS     r1,#1
 000038  0289              LSLS     r1,r1,#10
 00003a  4630              MOV      r0,r6
 00003c  f7fffffe          BL       SPI_EnableInt
-;;;271    		spiRxDataCount = 0;
+;;;278    		spiRxDataCount = 0;
 000040  812c              STRH     r4,[r5,#8]
                   |L6.66|
-;;;272    	}
-;;;273    	
-;;;274    	
-;;;275    }
+;;;279    	}
+;;;280    	
+;;;281    	
+;;;282    }
 000042  bd70              POP      {r4-r6,pc}
-;;;276    
+;;;283    
                           ENDP
 
                   |L6.68|
@@ -465,60 +476,60 @@
                           AREA ||i.SPI_Master_PreInit||, CODE, READONLY, ALIGN=2
 
                   SPI_Master_PreInit PROC
-;;;276    
-;;;277    void SPI_Master_PreInit(void)
+;;;283    
+;;;284    void SPI_Master_PreInit(void)
 000000  490f              LDR      r1,|L7.64|
-;;;278    {
+;;;285    {
 000002  b510              PUSH     {r4,lr}
-;;;279        uint16_t i = 0;
+;;;286        uint16_t i = 0;
 000004  2000              MOVS     r0,#0
-;;;280    	
-;;;281    	//prepare data
-;;;282        for (i=0; i < MASTER_DATA_NUM; i++)
-;;;283        {
-;;;284            MasterToSlaveTestPattern[i] = i;
-;;;285            MasterRxBuffer[i] = 0xFF;
+;;;287    	
+;;;288    	//prepare data
+;;;289        for (i=0; i < MASTER_DATA_NUM; i++)
+;;;290        {
+;;;291            MasterToSlaveTestPattern[i] = i;
+;;;292            MasterRxBuffer[i] = 0xFF;
 000006  22ff              MOVS     r2,#0xff
 000008  460b              MOV      r3,r1
 00000a  3310              ADDS     r3,r3,#0x10
                   |L7.12|
-00000c  5408              STRB     r0,[r1,r0]            ;284
+00000c  5408              STRB     r0,[r1,r0]            ;291
 00000e  541a              STRB     r2,[r3,r0]
 000010  1c40              ADDS     r0,r0,#1
-000012  b280              UXTH     r0,r0                 ;282
-000014  2810              CMP      r0,#0x10              ;282
+000012  b280              UXTH     r0,r0                 ;289
+000014  2810              CMP      r0,#0x10              ;289
 000016  d3f9              BCC      |L7.12|
-;;;286        }
-;;;287    
-;;;288    
-;;;289        /* Set TX FIFO threshold, enable TX FIFO threshold interrupt and RX FIFO time-out interrupt */
-;;;290        SPI_SetFIFO(SPI0, 2, 2);
+;;;293        }
+;;;294    
+;;;295    
+;;;296        /* Set TX FIFO threshold, enable TX FIFO threshold interrupt and RX FIFO time-out interrupt */
+;;;297        SPI_SetFIFO(SPI0, 2, 2);
 000018  4c0a              LDR      r4,|L7.68|
 00001a  2202              MOVS     r2,#2
 00001c  4611              MOV      r1,r2
 00001e  4620              MOV      r0,r4
 000020  f7fffffe          BL       SPI_SetFIFO
-;;;291        SPI_EnableInt(SPI0, SPI_FIFO_TXTH_INT_MASK | SPI_FIFO_RXTO_INT_MASK);
+;;;298        SPI_EnableInt(SPI0, SPI_FIFO_TXTH_INT_MASK | SPI_FIFO_RXTO_INT_MASK);
 000024  2109              MOVS     r1,#9
 000026  01c9              LSLS     r1,r1,#7
 000028  4620              MOV      r0,r4
 00002a  f7fffffe          BL       SPI_EnableInt
-;;;292    
-;;;293        spiTxDataCount = 0;
+;;;299    
+;;;300        spiTxDataCount = 0;
 00002e  4906              LDR      r1,|L7.72|
 000030  2000              MOVS     r0,#0
 000032  80c8              STRH     r0,[r1,#6]
-;;;294        spiRxDataCount = 0;
+;;;301        spiRxDataCount = 0;
 000034  8108              STRH     r0,[r1,#8]
 000036  2001              MOVS     r0,#1
 000038  4904              LDR      r1,|L7.76|
 00003a  0380              LSLS     r0,r0,#14
 00003c  6008              STR      r0,[r1,#0]
-;;;295        NVIC_EnableIRQ(SPI0_IRQn);
-;;;296    	
-;;;297    }
+;;;302        NVIC_EnableIRQ(SPI0_IRQn);
+;;;303    	
+;;;304    }
 00003e  bd10              POP      {r4,pc}
-;;;298    
+;;;305    
                           ENDP
 
                   |L7.64|
@@ -533,23 +544,23 @@
                           AREA ||i.SPI_Master_Slave_HW_Init||, CODE, READONLY, ALIGN=2
 
                   SPI_Master_Slave_HW_Init PROC
-;;;307    
-;;;308    void SPI_Master_Slave_HW_Init(void)
+;;;314    
+;;;315    void SPI_Master_Slave_HW_Init(void)
 000000  b510              PUSH     {r4,lr}
-;;;309    {
-;;;310        CLK_SetModuleClock(SPI0_MODULE, CLK_CLKSEL2_SPI0SEL_PCLK1, MODULE_NoMsk);
+;;;316    {
+;;;317        CLK_SetModuleClock(SPI0_MODULE, CLK_CLKSEL2_SPI0SEL_PCLK1, MODULE_NoMsk);
 000002  4c08              LDR      r4,|L8.36|
 000004  2200              MOVS     r2,#0
 000006  2120              MOVS     r1,#0x20
 000008  4620              MOV      r0,r4
 00000a  f7fffffe          BL       CLK_SetModuleClock
-;;;311    	
-;;;312        CLK_EnableModuleClock(SPI0_MODULE);
+;;;318    	
+;;;319        CLK_EnableModuleClock(SPI0_MODULE);
 00000e  4620              MOV      r0,r4
 000010  f7fffffe          BL       CLK_EnableModuleClock
-;;;313    	
-;;;314        /* Setup SPI0 multi-function pins */
-;;;315        SYS->GPA_MFPL = (SYS->GPA_MFPL & ~(SYS_GPA_MFPL_PA3MFP_Msk |
+;;;320    	
+;;;321        /* Setup SPI0 multi-function pins */
+;;;322        SYS->GPA_MFPL = (SYS->GPA_MFPL & ~(SYS_GPA_MFPL_PA3MFP_Msk |
 000014  07a0              LSLS     r0,r4,#30
 000016  6b01              LDR      r1,[r0,#0x30]
 000018  4a03              LDR      r2,|L8.40|
@@ -557,16 +568,16 @@
 00001c  0409              LSLS     r1,r1,#16
 00001e  1889              ADDS     r1,r1,r2
 000020  6301              STR      r1,[r0,#0x30]
-;;;316                                           SYS_GPA_MFPL_PA2MFP_Msk |
-;;;317                                           SYS_GPA_MFPL_PA1MFP_Msk |
-;;;318                                           SYS_GPA_MFPL_PA0MFP_Msk)) |
-;;;319    				                    (SYS_GPA_MFPL_PA3MFP_SPI0_SS |
-;;;320    				                     SYS_GPA_MFPL_PA2MFP_SPI0_CLK |
-;;;321    				                     SYS_GPA_MFPL_PA1MFP_SPI0_MISO |
-;;;322    				                     SYS_GPA_MFPL_PA0MFP_SPI0_MOSI);	
-;;;323    }
+;;;323                                           SYS_GPA_MFPL_PA2MFP_Msk |
+;;;324                                           SYS_GPA_MFPL_PA1MFP_Msk |
+;;;325                                           SYS_GPA_MFPL_PA0MFP_Msk)) |
+;;;326    				                    (SYS_GPA_MFPL_PA3MFP_SPI0_SS |
+;;;327    				                     SYS_GPA_MFPL_PA2MFP_SPI0_CLK |
+;;;328    				                     SYS_GPA_MFPL_PA1MFP_SPI0_MISO |
+;;;329    				                     SYS_GPA_MFPL_PA0MFP_SPI0_MOSI);	
+;;;330    }
 000022  bd10              POP      {r4,pc}
-;;;324    
+;;;331    
                           ENDP
 
                   |L8.36|
@@ -577,87 +588,110 @@
                           AREA ||i.SYS_Init||, CODE, READONLY, ALIGN=2
 
                   SYS_Init PROC
-;;;468    
-;;;469    void SYS_Init(void)
-000000  b570              PUSH     {r4-r6,lr}
-000002  2059              MOVS     r0,#0x59
-000004  4c12              LDR      r4,|L9.80|
-000006  2216              MOVS     r2,#0x16
-000008  2188              MOVS     r1,#0x88
-                  |L9.10|
-00000a  6020              STR      r0,[r4,#0]
-00000c  6022              STR      r2,[r4,#0]
-00000e  6021              STR      r1,[r4,#0]
-000010  6823              LDR      r3,[r4,#0]
-000012  2b00              CMP      r3,#0
-000014  d0f9              BEQ      |L9.10|
-;;;470    {
-;;;471        /* Unlock protected registers */
-;;;472        SYS_UnlockReg();
-;;;473    
-;;;474        /* Enable HIRC clock (Internal RC 48MHz) */
-;;;475        CLK_EnableXtalRC(CLK_PWRCTL_HIRCEN_Msk);
-000016  2004              MOVS     r0,#4
-000018  f7fffffe          BL       CLK_EnableXtalRC
-;;;476    //    CLK_EnableXtalRC(CLK_PWRCTL_HXTEN_Msk);
-;;;477    	
-;;;478        /* Wait for HIRC clock ready */
-;;;479        CLK_WaitClockReady(CLK_STATUS_HIRCSTB_Msk);
-00001c  2010              MOVS     r0,#0x10
-00001e  f7fffffe          BL       CLK_WaitClockReady
-;;;480    //    CLK_WaitClockReady(CLK_STATUS_HXTSTB_Msk);
-;;;481    	
-;;;482        /* Select HCLK clock source as HIRC and HCLK source divider as 1 */
-;;;483        CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_HIRC, CLK_CLKDIV0_HCLK(1));
-000022  2100              MOVS     r1,#0
-000024  2007              MOVS     r0,#7
-000026  f7fffffe          BL       CLK_SetHCLK
-;;;484    
-;;;485    	UART0_HW_Init();
-00002a  f7fffffe          BL       UART0_HW_Init
-;;;486    
-;;;487    	//SPI0 : PA0 : SPI0_MOSI , PA1 : SPI0_MISO , PA2 : SPI0_CLK , PA3 : SPI0_SS
-;;;488    	SPI_Master_Slave_HW_Init();
-00002e  f7fffffe          BL       SPI_Master_Slave_HW_Init
-;;;489    	
-;;;490        CLK_EnableModuleClock(TMR1_MODULE);
-000032  4d08              LDR      r5,|L9.84|
-000034  4628              MOV      r0,r5
-000036  f7fffffe          BL       CLK_EnableModuleClock
-;;;491        CLK_SetModuleClock(TMR1_MODULE, CLK_CLKSEL1_TMR1SEL_PCLK0, 0);
-00003a  2101              MOVS     r1,#1
-00003c  2200              MOVS     r2,#0
-00003e  0349              LSLS     r1,r1,#13
-000040  4628              MOV      r0,r5
-000042  f7fffffe          BL       CLK_SetModuleClock
-;;;492    	
-;;;493        /* Update System Core Clock */
-;;;494        SystemCoreClockUpdate();
-000046  f7fffffe          BL       SystemCoreClockUpdate
-00004a  2000              MOVS     r0,#0
-00004c  6020              STR      r0,[r4,#0]
-;;;495    
-;;;496        /* Lock protected registers */
-;;;497        SYS_LockReg();
-;;;498    }
-00004e  bd70              POP      {r4-r6,pc}
-;;;499    
+;;;475    
+;;;476    void SYS_Init(void)
+000000  b510              PUSH     {r4,lr}
+;;;477    {
+;;;478        /* Unlock protected registers */
+;;;479        SYS_UnlockReg();
+000002  f7fffffe          BL       SYS_UnlockReg
+;;;480    
+;;;481        /* Enable HIRC clock (Internal RC 48MHz) */
+;;;482        CLK_EnableXtalRC(CLK_PWRCTL_HIRCEN_Msk);
+000006  2004              MOVS     r0,#4
+000008  f7fffffe          BL       CLK_EnableXtalRC
+;;;483    //    CLK_EnableXtalRC(CLK_PWRCTL_HXTEN_Msk);
+;;;484    	
+;;;485        /* Wait for HIRC clock ready */
+;;;486        CLK_WaitClockReady(CLK_STATUS_HIRCSTB_Msk);
+00000c  2010              MOVS     r0,#0x10
+00000e  f7fffffe          BL       CLK_WaitClockReady
+;;;487    //    CLK_WaitClockReady(CLK_STATUS_HXTSTB_Msk);
+;;;488    	
+;;;489        /* Select HCLK clock source as HIRC and HCLK source divider as 1 */
+;;;490        CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_HIRC, CLK_CLKDIV0_HCLK(1));
+000012  2100              MOVS     r1,#0
+000014  2007              MOVS     r0,#7
+000016  f7fffffe          BL       CLK_SetHCLK
+;;;491    
+;;;492    	UART0_HW_Init();
+00001a  f7fffffe          BL       UART0_HW_Init
+;;;493    
+;;;494    	//SPI0 : PA0 : SPI0_MOSI , PA1 : SPI0_MISO , PA2 : SPI0_CLK , PA3 : SPI0_SS
+;;;495    	SPI_Master_Slave_HW_Init();
+00001e  f7fffffe          BL       SPI_Master_Slave_HW_Init
+;;;496    	
+;;;497        CLK_EnableModuleClock(TMR1_MODULE);
+000022  4c08              LDR      r4,|L9.68|
+000024  4620              MOV      r0,r4
+000026  f7fffffe          BL       CLK_EnableModuleClock
+;;;498        CLK_SetModuleClock(TMR1_MODULE, CLK_CLKSEL1_TMR1SEL_PCLK0, 0);
+00002a  2101              MOVS     r1,#1
+00002c  2200              MOVS     r2,#0
+00002e  0349              LSLS     r1,r1,#13
+000030  4620              MOV      r0,r4
+000032  f7fffffe          BL       CLK_SetModuleClock
+;;;499    	
+;;;500        /* Update System Core Clock */
+;;;501        SystemCoreClockUpdate();
+000036  f7fffffe          BL       SystemCoreClockUpdate
+00003a  4903              LDR      r1,|L9.72|
+00003c  2000              MOVS     r0,#0
+00003e  6008              STR      r0,[r1,#0]
+;;;502    
+;;;503        /* Lock protected registers */
+;;;504        SYS_LockReg();
+;;;505    }
+000040  bd10              POP      {r4,pc}
+;;;506    
                           ENDP
 
-                  |L9.80|
-                          DCD      0x40000100
-                  |L9.84|
+000042  0000              DCW      0x0000
+                  |L9.68|
                           DCD      0x5ec00003
+                  |L9.72|
+                          DCD      0x40000100
+
+                          AREA ||i.SYS_UnlockReg||, CODE, READONLY, ALIGN=2
+
+                  SYS_UnlockReg PROC
+;;;1341     */
+;;;1342   __STATIC_INLINE void SYS_UnlockReg(void)
+000000  b510              PUSH     {r4,lr}
+;;;1343   {
+;;;1344       do {
+;;;1345           SYS->REGLCTL = 0x59;
+000002  2159              MOVS     r1,#0x59
+000004  4804              LDR      r0,|L10.24|
+;;;1346           SYS->REGLCTL = 0x16;
+000006  2216              MOVS     r2,#0x16
+;;;1347           SYS->REGLCTL = 0x88;
+000008  2388              MOVS     r3,#0x88
+                  |L10.10|
+00000a  6001              STR      r1,[r0,#0]            ;1345
+00000c  6002              STR      r2,[r0,#0]            ;1346
+00000e  6003              STR      r3,[r0,#0]
+;;;1348       } while (SYS->REGLCTL == 0);
+000010  6804              LDR      r4,[r0,#0]
+000012  2c00              CMP      r4,#0
+000014  d0f9              BEQ      |L10.10|
+;;;1349   }
+000016  bd10              POP      {r4,pc}
+;;;1350   
+                          ENDP
+
+                  |L10.24|
+                          DCD      0x40000100
 
                           AREA ||i.TIMER1_Init||, CODE, READONLY, ALIGN=2
 
                   TIMER1_Init PROC
-;;;460    
-;;;461    void TIMER1_Init(void)
+;;;467    
+;;;468    void TIMER1_Init(void)
 000000  b510              PUSH     {r4,lr}
-;;;462    {
-;;;463        TIMER_Open(TIMER1, TIMER_PERIODIC_MODE, 1000);
-000002  4c0a              LDR      r4,|L10.44|
+;;;469    {
+;;;470        TIMER_Open(TIMER1, TIMER_PERIODIC_MODE, 1000);
+000002  4c0a              LDR      r4,|L11.44|
 000004  227d              MOVS     r2,#0x7d
 000006  2101              MOVS     r1,#1
 000008  00d2              LSLS     r2,r2,#3
@@ -669,24 +703,24 @@
 000016  4308              ORRS     r0,r0,r1
 000018  6020              STR      r0,[r4,#0]
 00001a  1508              ASRS     r0,r1,#20
-00001c  4904              LDR      r1,|L10.48|
+00001c  4904              LDR      r1,|L11.48|
 00001e  6008              STR      r0,[r1,#0]
 000020  6820              LDR      r0,[r4,#0]
 000022  0589              LSLS     r1,r1,#22
 000024  4308              ORRS     r0,r0,r1
 000026  6020              STR      r0,[r4,#0]
-;;;464        TIMER_EnableInt(TIMER1);
-;;;465        NVIC_EnableIRQ(TMR1_IRQn);	
-;;;466        TIMER_Start(TIMER1);
-;;;467    }
+;;;471        TIMER_EnableInt(TIMER1);
+;;;472        NVIC_EnableIRQ(TMR1_IRQn);	
+;;;473        TIMER_Start(TIMER1);
+;;;474    }
 000028  bd10              POP      {r4,pc}
-;;;468    
+;;;475    
                           ENDP
 
 00002a  0000              DCW      0x0000
-                  |L10.44|
+                  |L11.44|
                           DCD      0x40050020
-                  |L10.48|
+                  |L11.48|
                           DCD      0xe000e100
 
                           AREA ||i.TMR1_IRQHandler||, CODE, READONLY, ALIGN=2
@@ -699,218 +733,218 @@
                           REQUIRE _printf_int_dec
                           REQUIRE _printf_str
                   TMR1_IRQHandler PROC
-;;;441    
-;;;442    void TMR1_IRQHandler(void)
+;;;448    
+;;;449    void TMR1_IRQHandler(void)
 000000  b510              PUSH     {r4,lr}
-000002  4810              LDR      r0,|L11.68|
+000002  4810              LDR      r0,|L12.68|
 000004  6881              LDR      r1,[r0,#8]
 000006  07c9              LSLS     r1,r1,#31
 000008  0fc9              LSRS     r1,r1,#31
-;;;443    {
-00000a  d01a              BEQ      |L11.66|
+;;;450    {
+00000a  d01a              BEQ      |L12.66|
 00000c  2401              MOVS     r4,#1
 00000e  6084              STR      r4,[r0,#8]
-;;;444    	static uint32_t LOG = 0;
-;;;445    	static uint16_t CNT = 0;
-;;;446    	
-;;;447        if(TIMER_GetIntFlag(TIMER1) == 1)
-;;;448        {
-;;;449            TIMER_ClearIntFlag(TIMER1);
-;;;450    
-;;;451    		if (CNT++ >= 1000)
-000010  490d              LDR      r1,|L11.72|
+;;;451    	static uint32_t LOG = 0;
+;;;452    	static uint16_t CNT = 0;
+;;;453    	
+;;;454        if(TIMER_GetIntFlag(TIMER1) == 1)
+;;;455        {
+;;;456            TIMER_ClearIntFlag(TIMER1);
+;;;457    
+;;;458    		if (CNT++ >= 1000)
+000010  490d              LDR      r1,|L12.72|
 000012  8988              LDRH     r0,[r1,#0xc]  ; CNT
 000014  1c42              ADDS     r2,r0,#1
 000016  818a              STRH     r2,[r1,#0xc]
 000018  227d              MOVS     r2,#0x7d
 00001a  00d2              LSLS     r2,r2,#3
 00001c  4290              CMP      r0,r2
-00001e  d310              BCC      |L11.66|
-;;;452    		{		
-;;;453    			CNT = 0;
+00001e  d310              BCC      |L12.66|
+;;;459    		{		
+;;;460    			CNT = 0;
 000020  2000              MOVS     r0,#0
 000022  8188              STRH     r0,[r1,#0xc]
-;;;454            	printf("%s : %4d\r\n",__FUNCTION__,LOG++);
+;;;461            	printf("%s : %4d\r\n",__FUNCTION__,LOG++);
 000024  690a              LDR      r2,[r1,#0x10]  ; LOG
 000026  1c50              ADDS     r0,r2,#1
 000028  6108              STR      r0,[r1,#0x10]  ; LOG
-00002a  4908              LDR      r1,|L11.76|
-00002c  a008              ADR      r0,|L11.80|
+00002a  4908              LDR      r1,|L12.76|
+00002c  a008              ADR      r0,|L12.80|
 00002e  f7fffffe          BL       __2printf
-;;;455    			PB14 ^= 1;	
-000032  490a              LDR      r1,|L11.92|
+;;;462    			PB14 ^= 1;	
+000032  490a              LDR      r1,|L12.92|
 000034  6b88              LDR      r0,[r1,#0x38]
 000036  4060              EORS     r0,r0,r4
 000038  6388              STR      r0,[r1,#0x38]
-;;;456    			set_flag(flag_Record_Data , ENABLE);
+;;;463    			set_flag(flag_Record_Data , ENABLE);
 00003a  2101              MOVS     r1,#1
 00003c  2004              MOVS     r0,#4
 00003e  f7fffffe          BL       set_flag
-                  |L11.66|
-;;;457    		}		
-;;;458        }
-;;;459    }
+                  |L12.66|
+;;;464    		}		
+;;;465        }
+;;;466    }
 000042  bd10              POP      {r4,pc}
-;;;460    
+;;;467    
                           ENDP
 
-                  |L11.68|
+                  |L12.68|
                           DCD      0x40050020
-                  |L11.72|
+                  |L12.72|
                           DCD      ||.data||
-                  |L11.76|
+                  |L12.76|
                           DCD      ||.constdata||
-                  |L11.80|
+                  |L12.80|
 000050  2573203a          DCB      "%s : %4d\r\n",0
 000054  20253464
 000058  0d0a00  
 00005b  00                DCB      0
-                  |L11.92|
+                  |L12.92|
                           DCD      0x40004840
 
                           AREA ||i.UART02_IRQHandler||, CODE, READONLY, ALIGN=2
 
                   UART02_IRQHandler PROC
-;;;352    
-;;;353    void UART02_IRQHandler(void)
+;;;359    
+;;;360    void UART02_IRQHandler(void)
 000000  b570              PUSH     {r4-r6,lr}
-;;;354    {
-;;;355        uint8_t i;
-;;;356        static uint16_t u16UART_RX_Buffer_Index = 0;
-;;;357    
-;;;358    	if ((UART_GET_INT_FLAG(UART0,UART_INTSTS_RDAINT_Msk)))
-000002  4d1a              LDR      r5,|L12.108|
+;;;361    {
+;;;362        uint8_t i;
+;;;363        static uint16_t u16UART_RX_Buffer_Index = 0;
+;;;364    
+;;;365    	if ((UART_GET_INT_FLAG(UART0,UART_INTSTS_RDAINT_Msk)))
+000002  4d1a              LDR      r5,|L13.108|
 000004  69e8              LDR      r0,[r5,#0x1c]
 000006  2600              MOVS     r6,#0
 000008  05c0              LSLS     r0,r0,#23
-;;;359    	{
-;;;360            /* UART receive data available flag */
-;;;361            
-;;;362            /* Record RDA interrupt trigger times */
-;;;363            g_u8UART_RDA_Trigger_Cnt++;
-00000a  4c19              LDR      r4,|L12.112|
-;;;364            
-;;;365            /* Move the data from Rx FIFO to sw buffer (RAM). */
-;;;366            /* Every time leave 1 byte data in FIFO for Rx timeout */
-;;;367            for(i = 0 ; i < (FIFO_THRESHOLD - 1) ; i++)
-;;;368            {
-;;;369                g_au8UART_RX_Buffer[u16UART_RX_Buffer_Index] = UART_READ(UART0);
-00000c  4a19              LDR      r2,|L12.116|
-00000e  2800              CMP      r0,#0                 ;358
-000010  da11              BGE      |L12.54|
-000012  7860              LDRB     r0,[r4,#1]            ;363  ; g_u8UART_RDA_Trigger_Cnt
-000014  1c40              ADDS     r0,r0,#1              ;363
-000016  7060              STRB     r0,[r4,#1]            ;363
-000018  2000              MOVS     r0,#0                 ;367
-                  |L12.26|
+;;;366    	{
+;;;367            /* UART receive data available flag */
+;;;368            
+;;;369            /* Record RDA interrupt trigger times */
+;;;370            g_u8UART_RDA_Trigger_Cnt++;
+00000a  4c19              LDR      r4,|L13.112|
+;;;371            
+;;;372            /* Move the data from Rx FIFO to sw buffer (RAM). */
+;;;373            /* Every time leave 1 byte data in FIFO for Rx timeout */
+;;;374            for(i = 0 ; i < (FIFO_THRESHOLD - 1) ; i++)
+;;;375            {
+;;;376                g_au8UART_RX_Buffer[u16UART_RX_Buffer_Index] = UART_READ(UART0);
+00000c  4a19              LDR      r2,|L13.116|
+00000e  2800              CMP      r0,#0                 ;365
+000010  da11              BGE      |L13.54|
+000012  7860              LDRB     r0,[r4,#1]            ;370  ; g_u8UART_RDA_Trigger_Cnt
+000014  1c40              ADDS     r0,r0,#1              ;370
+000016  7060              STRB     r0,[r4,#1]            ;370
+000018  2000              MOVS     r0,#0                 ;374
+                  |L13.26|
 00001a  682b              LDR      r3,[r5,#0]
 00001c  8961              LDRH     r1,[r4,#0xa]  ; u16UART_RX_Buffer_Index
 00001e  5453              STRB     r3,[r2,r1]
 000020  1c49              ADDS     r1,r1,#1
-;;;370                u16UART_RX_Buffer_Index ++;
+;;;377                u16UART_RX_Buffer_Index ++;
 000022  b289              UXTH     r1,r1
 000024  8161              STRH     r1,[r4,#0xa]
-;;;371    
-;;;372                if (u16UART_RX_Buffer_Index >= RX_BUFFER_SIZE) 
+;;;378    
+;;;379                if (u16UART_RX_Buffer_Index >= RX_BUFFER_SIZE) 
 000026  2980              CMP      r1,#0x80
-000028  d300              BCC      |L12.44|
-;;;373                    u16UART_RX_Buffer_Index = 0;
+000028  d300              BCC      |L13.44|
+;;;380                    u16UART_RX_Buffer_Index = 0;
 00002a  8166              STRH     r6,[r4,#0xa]
-                  |L12.44|
+                  |L13.44|
 00002c  1c40              ADDS     r0,r0,#1
-00002e  b2c0              UXTB     r0,r0                 ;367
-000030  2803              CMP      r0,#3                 ;367
-000032  d3f2              BCC      |L12.26|
-                  |L12.52|
-;;;374            }	
-;;;375    	}
-;;;376        else if(UART_GET_INT_FLAG(UART0, UART_INTSTS_RXTOINT_Msk)) 
-;;;377        {
-;;;378            /* When Rx timeout flag is set to 1, it means there is no data needs to be transmitted. */
-;;;379    
-;;;380            /* Record Timeout times */
-;;;381            g_u8UART_RXTO_Trigger_Cnt++;
-;;;382    
-;;;383            /* Move the last data from Rx FIFO to sw buffer. */
-;;;384            while(UART_GET_RX_EMPTY(UART0) == 0)
-;;;385            {
-;;;386                g_au8UART_RX_Buffer[u16UART_RX_Buffer_Index] = UART_READ(UART0);
-;;;387                u16UART_RX_Buffer_Index ++;
-;;;388            }
+00002e  b2c0              UXTB     r0,r0                 ;374
+000030  2803              CMP      r0,#3                 ;374
+000032  d3f2              BCC      |L13.26|
+                  |L13.52|
+;;;381            }	
+;;;382    	}
+;;;383        else if(UART_GET_INT_FLAG(UART0, UART_INTSTS_RXTOINT_Msk)) 
+;;;384        {
+;;;385            /* When Rx timeout flag is set to 1, it means there is no data needs to be transmitted. */
+;;;386    
+;;;387            /* Record Timeout times */
+;;;388            g_u8UART_RXTO_Trigger_Cnt++;
 ;;;389    
-;;;390            /* Clear UART RX parameter */
-;;;391            UART_DISABLE_INT(UART0, UART_INTEN_RDAIEN_Msk | UART_INTEN_RXTOIEN_Msk);
-;;;392            u16UART_RX_Buffer_Index = 0;
-;;;393    		set_UART_RX_Finish(eUART_RX_Received_Data_Finish);
-;;;394    
-;;;395    		set_flag(flag_UART_RX_Finish,ENABLE);
+;;;390            /* Move the last data from Rx FIFO to sw buffer. */
+;;;391            while(UART_GET_RX_EMPTY(UART0) == 0)
+;;;392            {
+;;;393                g_au8UART_RX_Buffer[u16UART_RX_Buffer_Index] = UART_READ(UART0);
+;;;394                u16UART_RX_Buffer_Index ++;
+;;;395            }
 ;;;396    
-;;;397        }
-;;;398    	
-;;;399    }
+;;;397            /* Clear UART RX parameter */
+;;;398            UART_DISABLE_INT(UART0, UART_INTEN_RDAIEN_Msk | UART_INTEN_RXTOIEN_Msk);
+;;;399            u16UART_RX_Buffer_Index = 0;
+;;;400    		set_UART_RX_Finish(eUART_RX_Received_Data_Finish);
+;;;401    
+;;;402    		set_flag(flag_UART_RX_Finish,ENABLE);
+;;;403    
+;;;404        }
+;;;405    	
+;;;406    }
 000034  bd70              POP      {r4-r6,pc}
-                  |L12.54|
-000036  69e8              LDR      r0,[r5,#0x1c]         ;376
-000038  04c0              LSLS     r0,r0,#19             ;376
-00003a  d5fb              BPL      |L12.52|
-00003c  78a0              LDRB     r0,[r4,#2]            ;381  ; g_u8UART_RXTO_Trigger_Cnt
-00003e  1c40              ADDS     r0,r0,#1              ;381
-000040  70a0              STRB     r0,[r4,#2]            ;381
-000042  e004              B        |L12.78|
-                  |L12.68|
-000044  6829              LDR      r1,[r5,#0]            ;386
-000046  8960              LDRH     r0,[r4,#0xa]          ;386  ; u16UART_RX_Buffer_Index
-000048  5411              STRB     r1,[r2,r0]            ;386
-00004a  1c40              ADDS     r0,r0,#1              ;386
-00004c  8160              STRH     r0,[r4,#0xa]          ;387
-                  |L12.78|
-00004e  69a8              LDR      r0,[r5,#0x18]         ;384
-000050  0440              LSLS     r0,r0,#17             ;384
-000052  d5f7              BPL      |L12.68|
-000054  6868              LDR      r0,[r5,#4]            ;391
-000056  2111              MOVS     r1,#0x11              ;391
-000058  4388              BICS     r0,r0,r1              ;391
-00005a  6068              STR      r0,[r5,#4]            ;391
-00005c  8166              STRH     r6,[r4,#0xa]          ;392
-00005e  7026              STRB     r6,[r4,#0]            ;392
-000060  2101              MOVS     r1,#1                 ;395
-000062  2003              MOVS     r0,#3                 ;395
+                  |L13.54|
+000036  69e8              LDR      r0,[r5,#0x1c]         ;383
+000038  04c0              LSLS     r0,r0,#19             ;383
+00003a  d5fb              BPL      |L13.52|
+00003c  78a0              LDRB     r0,[r4,#2]            ;388  ; g_u8UART_RXTO_Trigger_Cnt
+00003e  1c40              ADDS     r0,r0,#1              ;388
+000040  70a0              STRB     r0,[r4,#2]            ;388
+000042  e004              B        |L13.78|
+                  |L13.68|
+000044  6829              LDR      r1,[r5,#0]            ;393
+000046  8960              LDRH     r0,[r4,#0xa]          ;393  ; u16UART_RX_Buffer_Index
+000048  5411              STRB     r1,[r2,r0]            ;393
+00004a  1c40              ADDS     r0,r0,#1              ;393
+00004c  8160              STRH     r0,[r4,#0xa]          ;394
+                  |L13.78|
+00004e  69a8              LDR      r0,[r5,#0x18]         ;391
+000050  0440              LSLS     r0,r0,#17             ;391
+000052  d5f7              BPL      |L13.68|
+000054  6868              LDR      r0,[r5,#4]            ;398
+000056  2111              MOVS     r1,#0x11              ;398
+000058  4388              BICS     r0,r0,r1              ;398
+00005a  6068              STR      r0,[r5,#4]            ;398
+00005c  8166              STRH     r6,[r4,#0xa]          ;399
+00005e  7026              STRB     r6,[r4,#0]            ;399
+000060  2101              MOVS     r1,#1                 ;402
+000062  2003              MOVS     r0,#3                 ;402
 000064  f7fffffe          BL       set_flag
 000068  bd70              POP      {r4-r6,pc}
-;;;400    
+;;;407    
                           ENDP
 
 00006a  0000              DCW      0x0000
-                  |L12.108|
+                  |L13.108|
                           DCD      0x40070000
-                  |L12.112|
+                  |L13.112|
                           DCD      ||.data||
-                  |L12.116|
+                  |L13.116|
                           DCD      ||.bss||
 
                           AREA ||i.UART0_HW_Init||, CODE, READONLY, ALIGN=2
 
                   UART0_HW_Init PROC
-;;;400    
-;;;401    void UART0_HW_Init(void)
+;;;407    
+;;;408    void UART0_HW_Init(void)
 000000  b510              PUSH     {r4,lr}
-;;;402    {
-;;;403        /* Enable UART0 clock */	
-;;;404        CLK_EnableModuleClock(UART0_MODULE);
-000002  4c0a              LDR      r4,|L13.44|
+;;;409    {
+;;;410        /* Enable UART0 clock */	
+;;;411        CLK_EnableModuleClock(UART0_MODULE);
+000002  4c0a              LDR      r4,|L14.44|
 000004  4620              MOV      r0,r4
 000006  f7fffffe          BL       CLK_EnableModuleClock
-;;;405    
-;;;406        /* Switch UART0 clock source */	
-;;;407        CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART0SEL_PCLK0, CLK_CLKDIV0_UART0(1));
+;;;412    
+;;;413        /* Switch UART0 clock source */	
+;;;414        CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART0SEL_PCLK0, CLK_CLKDIV0_UART0(1));
 00000a  2101              MOVS     r1,#1
 00000c  2200              MOVS     r2,#0
 00000e  0689              LSLS     r1,r1,#26
 000010  4620              MOV      r0,r4
 000012  f7fffffe          BL       CLK_SetModuleClock
-;;;408    
-;;;409        /* Set PB multi-function pins for UART0 RXD=PB.12 and TXD=PB.13 */
-;;;410        SYS->GPB_MFPH = (SYS->GPB_MFPH & ~(SYS_GPB_MFPH_PB12MFP_Msk | SYS_GPB_MFPH_PB13MFP_Msk))    |       \
+;;;415    
+;;;416        /* Set PB multi-function pins for UART0 RXD=PB.12 and TXD=PB.13 */
+;;;417        SYS->GPB_MFPH = (SYS->GPB_MFPH & ~(SYS_GPB_MFPH_PB12MFP_Msk | SYS_GPB_MFPH_PB13MFP_Msk))    |       \
 000016  06a0              LSLS     r0,r4,#26
 000018  6bc1              LDR      r1,[r0,#0x3c]
 00001a  22ff              MOVS     r2,#0xff
@@ -920,14 +954,14 @@
 000022  0452              LSLS     r2,r2,#17
 000024  1889              ADDS     r1,r1,r2
 000026  63c1              STR      r1,[r0,#0x3c]
-;;;411                        (SYS_GPB_MFPH_PB12MFP_UART0_RXD | SYS_GPB_MFPH_PB13MFP_UART0_TXD);	
-;;;412    }
+;;;418                        (SYS_GPB_MFPH_PB12MFP_UART0_RXD | SYS_GPB_MFPH_PB13MFP_UART0_TXD);	
+;;;419    }
 000028  bd10              POP      {r4,pc}
-;;;413    
+;;;420    
                           ENDP
 
 00002a  0000              DCW      0x0000
-                  |L13.44|
+                  |L14.44|
                           DCD      0x5f803d10
 
                           AREA ||i.UART0_Init||, CODE, READONLY, ALIGN=2
@@ -938,94 +972,94 @@
                           REQUIRE _printf_d
                           REQUIRE _printf_int_dec
                   UART0_Init PROC
-;;;413    
-;;;414    void UART0_Init(void)
+;;;420    
+;;;421    void UART0_Init(void)
 000000  b510              PUSH     {r4,lr}
-;;;415    {
-;;;416        SYS_ResetModule(UART0_RST);
-000002  481e              LDR      r0,|L14.124|
+;;;422    {
+;;;423        SYS_ResetModule(UART0_RST);
+000002  481e              LDR      r0,|L15.124|
 000004  f7fffffe          BL       SYS_ResetModule
-;;;417    
-;;;418        /* Configure UART0 and set UART0 baud rate */
-;;;419        UART_Open(UART0, 115200);
-000008  4c1d              LDR      r4,|L14.128|
+;;;424    
+;;;425        /* Configure UART0 and set UART0 baud rate */
+;;;426        UART_Open(UART0, 115200);
+000008  4c1d              LDR      r4,|L15.128|
 00000a  21e1              MOVS     r1,#0xe1
 00000c  0249              LSLS     r1,r1,#9
 00000e  4620              MOV      r0,r4
 000010  f7fffffe          BL       UART_Open
-;;;420    
-;;;421    	/* Set UART receive time-out */
-;;;422    	UART_SetTimeoutCnt(UART0, RX_TIMEOUT_CNT);
+;;;427    
+;;;428    	/* Set UART receive time-out */
+;;;429    	UART_SetTimeoutCnt(UART0, RX_TIMEOUT_CNT);
 000014  2114              MOVS     r1,#0x14
 000016  4620              MOV      r0,r4
 000018  f7fffffe          BL       UART_SetTimeoutCnt
-;;;423    
-;;;424    	/* Set UART FIFO RX interrupt trigger level to 4-bytes*/
-;;;425        UART0->FIFO = ((UART0->FIFO & (~UART_FIFO_RFITL_Msk)) | UART_FIFO_RFITL_4BYTES);
+;;;430    
+;;;431    	/* Set UART FIFO RX interrupt trigger level to 4-bytes*/
+;;;432        UART0->FIFO = ((UART0->FIFO & (~UART_FIFO_RFITL_Msk)) | UART_FIFO_RFITL_4BYTES);
 00001c  68a0              LDR      r0,[r4,#8]
 00001e  21f0              MOVS     r1,#0xf0
 000020  4388              BICS     r0,r0,r1
 000022  3010              ADDS     r0,r0,#0x10
 000024  60a0              STR      r0,[r4,#8]
-;;;426    
-;;;427    	/* Enable UART Interrupt - */
-;;;428    	UART_ENABLE_INT(UART0, UART_INTEN_RDAIEN_Msk | UART_INTEN_RXTOIEN_Msk);
+;;;433    
+;;;434    	/* Enable UART Interrupt - */
+;;;435    	UART_ENABLE_INT(UART0, UART_INTEN_RDAIEN_Msk | UART_INTEN_RXTOIEN_Msk);
 000026  6860              LDR      r0,[r4,#4]
 000028  2111              MOVS     r1,#0x11
 00002a  4308              ORRS     r0,r0,r1
 00002c  6060              STR      r0,[r4,#4]
 00002e  2001              MOVS     r0,#1
-000030  4914              LDR      r1,|L14.132|
+000030  4914              LDR      r1,|L15.132|
 000032  0300              LSLS     r0,r0,#12
 000034  6008              STR      r0,[r1,#0]
-;;;429    	
-;;;430    	NVIC_EnableIRQ(UART02_IRQn);	
-;;;431    
-;;;432    	printf("\r\nCLK_GetCPUFreq : %8d\r\n",CLK_GetCPUFreq());
+;;;436    	
+;;;437    	NVIC_EnableIRQ(UART02_IRQn);	
+;;;438    
+;;;439    	printf("\r\nCLK_GetCPUFreq : %8d\r\n",CLK_GetCPUFreq());
 000036  f7fffffe          BL       CLK_GetCPUFreq
 00003a  4601              MOV      r1,r0
-00003c  a012              ADR      r0,|L14.136|
+00003c  a012              ADR      r0,|L15.136|
 00003e  f7fffffe          BL       __2printf
-;;;433    	printf("CLK_GetHXTFreq : %8d\r\n",CLK_GetHXTFreq());
+;;;440    	printf("CLK_GetHXTFreq : %8d\r\n",CLK_GetHXTFreq());
 000042  f7fffffe          BL       CLK_GetHXTFreq
 000046  4601              MOV      r1,r0
-000048  a016              ADR      r0,|L14.164|
+000048  a016              ADR      r0,|L15.164|
 00004a  f7fffffe          BL       __2printf
-;;;434    	printf("CLK_GetLXTFreq : %8d\r\n",CLK_GetLXTFreq());	
+;;;441    	printf("CLK_GetLXTFreq : %8d\r\n",CLK_GetLXTFreq());	
 00004e  f7fffffe          BL       CLK_GetLXTFreq
 000052  4601              MOV      r1,r0
-000054  a019              ADR      r0,|L14.188|
+000054  a019              ADR      r0,|L15.188|
 000056  f7fffffe          BL       __2printf
-;;;435    	printf("CLK_GetPCLK0Freq : %8d\r\n",CLK_GetPCLK0Freq());
+;;;442    	printf("CLK_GetPCLK0Freq : %8d\r\n",CLK_GetPCLK0Freq());
 00005a  f7fffffe          BL       CLK_GetPCLK0Freq
 00005e  4601              MOV      r1,r0
-000060  a01c              ADR      r0,|L14.212|
+000060  a01c              ADR      r0,|L15.212|
 000062  f7fffffe          BL       __2printf
-;;;436    	printf("CLK_GetPCLK1Freq : %8d\r\n",CLK_GetPCLK1Freq());
+;;;443    	printf("CLK_GetPCLK1Freq : %8d\r\n",CLK_GetPCLK1Freq());
 000066  f7fffffe          BL       CLK_GetPCLK1Freq
 00006a  4601              MOV      r1,r0
-00006c  a020              ADR      r0,|L14.240|
+00006c  a020              ADR      r0,|L15.240|
 00006e  f7fffffe          BL       __2printf
-                  |L14.114|
-;;;437    
-;;;438    
-;;;439    	UART_WAIT_TX_EMPTY(UART0);
+                  |L15.114|
+;;;444    
+;;;445    
+;;;446    	UART_WAIT_TX_EMPTY(UART0);
 000072  69a0              LDR      r0,[r4,#0x18]
 000074  00c0              LSLS     r0,r0,#3
-000076  d5fc              BPL      |L14.114|
-;;;440    }
+000076  d5fc              BPL      |L15.114|
+;;;447    }
 000078  bd10              POP      {r4,pc}
-;;;441    
+;;;448    
                           ENDP
 
 00007a  0000              DCW      0x0000
-                  |L14.124|
+                  |L15.124|
                           DCD      0x04000010
-                  |L14.128|
+                  |L15.128|
                           DCD      0x40070000
-                  |L14.132|
+                  |L15.132|
                           DCD      0xe000e100
-                  |L14.136|
+                  |L15.136|
 000088  0d0a434c          DCB      "\r\nCLK_GetCPUFreq : %8d\r\n",0
 00008c  4b5f4765
 000090  74435055
@@ -1036,7 +1070,7 @@
 0000a1  00                DCB      0
 0000a2  00                DCB      0
 0000a3  00                DCB      0
-                  |L14.164|
+                  |L15.164|
 0000a4  434c4b5f          DCB      "CLK_GetHXTFreq : %8d\r\n",0
 0000a8  47657448
 0000ac  58544672
@@ -1044,7 +1078,7 @@
 0000b4  20253864
 0000b8  0d0a00  
 0000bb  00                DCB      0
-                  |L14.188|
+                  |L15.188|
 0000bc  434c4b5f          DCB      "CLK_GetLXTFreq : %8d\r\n",0
 0000c0  4765744c
 0000c4  58544672
@@ -1052,7 +1086,7 @@
 0000cc  20253864
 0000d0  0d0a00  
 0000d3  00                DCB      0
-                  |L14.212|
+                  |L15.212|
 0000d4  434c4b5f          DCB      "CLK_GetPCLK0Freq : %8d\r\n",0
 0000d8  47657450
 0000dc  434c4b30
@@ -1063,7 +1097,7 @@
 0000ed  00                DCB      0
 0000ee  00                DCB      0
 0000ef  00                DCB      0
-                  |L14.240|
+                  |L15.240|
 0000f0  434c4b5f          DCB      "CLK_GetPCLK1Freq : %8d\r\n",0
 0000f4  47657450
 0000f8  434c4b31
@@ -1083,66 +1117,66 @@
                           REQUIRE _printf_d
                           REQUIRE _printf_int_dec
                   UART_Loop_Process PROC
-;;;325    
-;;;326    void UART_Loop_Process(void)
+;;;332    
+;;;333    void UART_Loop_Process(void)
 000000  b510              PUSH     {r4,lr}
-;;;327    {
-;;;328    
-;;;329    	if (is_flag_set(flag_UART_RX_Finish))
+;;;334    {
+;;;335    
+;;;336    	if (is_flag_set(flag_UART_RX_Finish))
 000002  2003              MOVS     r0,#3
 000004  f7fffffe          BL       is_flag_set
 000008  2800              CMP      r0,#0
-00000a  d017              BEQ      |L15.60|
-;;;330    	{
-;;;331    //		/* Wait to receive UART data */
-;;;332    //		while(UART_RX_IDLE(UART0));
-;;;333    
-;;;334    //		/* Start to received UART data */
-;;;335    //		set_UART_RX_Finish(eUART_RX_Received_Data_NOT_Finish);     
-;;;336    //		/* Wait for receiving UART message finished */
-;;;337    //		while(is_UART_RX_Finish() != eUART_RX_Received_Data_Finish); 
-;;;338    
-;;;339    		set_flag(flag_UART_RX_Finish , DISABLE);
+00000a  d017              BEQ      |L16.60|
+;;;337    	{
+;;;338    //		/* Wait to receive UART data */
+;;;339    //		while(UART_RX_IDLE(UART0));
+;;;340    
+;;;341    //		/* Start to received UART data */
+;;;342    //		set_UART_RX_Finish(eUART_RX_Received_Data_NOT_Finish);     
+;;;343    //		/* Wait for receiving UART message finished */
+;;;344    //		while(is_UART_RX_Finish() != eUART_RX_Received_Data_Finish); 
+;;;345    
+;;;346    		set_flag(flag_UART_RX_Finish , DISABLE);
 00000c  2100              MOVS     r1,#0
 00000e  2003              MOVS     r0,#3
 000010  f7fffffe          BL       set_flag
-;;;340    
-;;;341    		printf("\nUART0 Rx Received Data : %s\n",g_au8UART_RX_Buffer);
-000014  490a              LDR      r1,|L15.64|
-000016  a00b              ADR      r0,|L15.68|
+;;;347    
+;;;348    		printf("\nUART0 Rx Received Data : %s\n",g_au8UART_RX_Buffer);
+000014  490a              LDR      r1,|L16.64|
+000016  a00b              ADR      r0,|L16.68|
 000018  f7fffffe          BL       __2printf
-;;;342    		printf("UART0 Rx RDA (Fifofull) interrupt times : %d\n",g_u8UART_RDA_Trigger_Cnt);
-00001c  4c11              LDR      r4,|L15.100|
+;;;349    		printf("UART0 Rx RDA (Fifofull) interrupt times : %d\n",g_u8UART_RDA_Trigger_Cnt);
+00001c  4c11              LDR      r4,|L16.100|
 00001e  7861              LDRB     r1,[r4,#1]  ; g_u8UART_RDA_Trigger_Cnt
-000020  a011              ADR      r0,|L15.104|
+000020  a011              ADR      r0,|L16.104|
 000022  f7fffffe          BL       __2printf
-;;;343    		printf("UART0 Rx RXTO (Timeout) interrupt times : %d\n",g_u8UART_RXTO_Trigger_Cnt);
+;;;350    		printf("UART0 Rx RXTO (Timeout) interrupt times : %d\n",g_u8UART_RXTO_Trigger_Cnt);
 000026  78a1              LDRB     r1,[r4,#2]  ; g_u8UART_RXTO_Trigger_Cnt
-000028  a01b              ADR      r0,|L15.152|
+000028  a01b              ADR      r0,|L16.152|
 00002a  f7fffffe          BL       __2printf
-;;;344    
-;;;345    		/* Reset UART interrupt parameter */
-;;;346    		UART_EnableInt(UART0, UART_INTEN_RDAIEN_Msk | UART_INTEN_RXTOIEN_Msk);
+;;;351    
+;;;352    		/* Reset UART interrupt parameter */
+;;;353    		UART_EnableInt(UART0, UART_INTEN_RDAIEN_Msk | UART_INTEN_RXTOIEN_Msk);
 00002e  2111              MOVS     r1,#0x11
-000030  4825              LDR      r0,|L15.200|
+000030  4825              LDR      r0,|L16.200|
 000032  f7fffffe          BL       UART_EnableInt
-;;;347    		g_u8UART_RDA_Trigger_Cnt = 0; // UART RDA interrupt times
+;;;354    		g_u8UART_RDA_Trigger_Cnt = 0; // UART RDA interrupt times
 000036  2000              MOVS     r0,#0
 000038  7060              STRB     r0,[r4,#1]
-;;;348    		g_u8UART_RXTO_Trigger_Cnt = 0; // UART RXTO interrupt times
+;;;355    		g_u8UART_RXTO_Trigger_Cnt = 0; // UART RXTO interrupt times
 00003a  70a0              STRB     r0,[r4,#2]
-                  |L15.60|
-;;;349    
-;;;350    	}
-;;;351    }
+                  |L16.60|
+;;;356    
+;;;357    	}
+;;;358    }
 00003c  bd10              POP      {r4,pc}
-;;;352    
+;;;359    
                           ENDP
 
 00003e  0000              DCW      0x0000
-                  |L15.64|
+                  |L16.64|
                           DCD      ||.bss||
-                  |L15.68|
+                  |L16.68|
 000044  0a554152          DCB      "\nUART0 Rx Received Data : %s\n",0
 000048  54302052
 00004c  78205265
@@ -1153,9 +1187,9 @@
 000060  0a00    
 000062  00                DCB      0
 000063  00                DCB      0
-                  |L15.100|
+                  |L16.100|
                           DCD      ||.data||
-                  |L15.104|
+                  |L16.104|
 000068  55415254          DCB      "UART0 Rx RDA (Fifofull) interrupt times : %d\n",0
 00006c  30205278
 000070  20524441
@@ -1170,7 +1204,7 @@
 000094  0a00    
 000096  00                DCB      0
 000097  00                DCB      0
-                  |L15.152|
+                  |L16.152|
 000098  55415254          DCB      "UART0 Rx RXTO (Timeout) interrupt times : %d\n",0
 00009c  30205278
 0000a0  20525854
@@ -1185,7 +1219,7 @@
 0000c4  0a00    
 0000c6  00                DCB      0
 0000c7  00                DCB      0
-                  |L15.200|
+                  |L16.200|
                           DCD      0x40070000
 
                           AREA ||i.is_UART_RX_Finish||, CODE, READONLY, ALIGN=2
@@ -1193,7 +1227,7 @@
                   is_UART_RX_Finish PROC
 ;;;68     
 ;;;69     eUART_RX_State_Index is_UART_RX_Finish(void)
-000000  4801              LDR      r0,|L16.8|
+000000  4801              LDR      r0,|L17.8|
 ;;;70     {
 ;;;71     	return g_bUART_RX_Received_Data_State;
 000002  7800              LDRB     r0,[r0,#0]  ; g_bUART_RX_Received_Data_State
@@ -1203,7 +1237,7 @@
                           ENDP
 
 000006  0000              DCW      0x0000
-                  |L16.8|
+                  |L17.8|
                           DCD      ||.data||
 
                           AREA ||i.is_flag_set||, CODE, READONLY, ALIGN=2
@@ -1215,65 +1249,65 @@
 ;;;80     {
 ;;;81     	return BitFlag_READ(ReadBit(idx));
 000002  4081              LSLS     r1,r1,r0
-000004  4803              LDR      r0,|L17.20|
+000004  4803              LDR      r0,|L18.20|
 000006  78c0              LDRB     r0,[r0,#3]  ; BitFlag
 000008  4201              TST      r1,r0
-00000a  d001              BEQ      |L17.16|
+00000a  d001              BEQ      |L18.16|
 00000c  2001              MOVS     r0,#1
 ;;;82     }
 00000e  4770              BX       lr
-                  |L17.16|
+                  |L18.16|
 000010  2000              MOVS     r0,#0                 ;81
 000012  4770              BX       lr
 ;;;83     
                           ENDP
 
-                  |L17.20|
+                  |L18.20|
                           DCD      ||.data||
 
                           AREA ||i.main||, CODE, READONLY, ALIGN=1
 
                   main PROC
-;;;507    
-;;;508    int main()
+;;;514    
+;;;515    int main()
 000000  f7fffffe          BL       SYS_Init
-;;;509    {
-;;;510        SYS_Init();
-;;;511    
-;;;512        UART0_Init();
-000004  f7fffffe          BL       UART0_Init
-;;;513    	
-;;;514    	SPI_Master_Init();
-000008  f7fffffe          BL       SPI_Master_Init
-;;;515    	SPI_Master_PreInit();
-00000c  f7fffffe          BL       SPI_Master_PreInit
-;;;516    
-;;;517    	Emulate_EEPROM();
-000010  f7fffffe          BL       Emulate_EEPROM
+;;;516    {
+;;;517        SYS_Init();
 ;;;518    
-;;;519    	GPIO_Init();
+;;;519        UART0_Init();
+000004  f7fffffe          BL       UART0_Init
+;;;520    	
+;;;521    	SPI_Master_Init();
+000008  f7fffffe          BL       SPI_Master_Init
+;;;522    	SPI_Master_PreInit();
+00000c  f7fffffe          BL       SPI_Master_PreInit
+;;;523    
+;;;524    	Emulate_EEPROM();
+000010  f7fffffe          BL       Emulate_EEPROM
+;;;525    
+;;;526    	GPIO_Init();
 000014  f7fffffe          BL       GPIO_Init
-;;;520    
-;;;521    	TIMER1_Init();
-000018  f7fffffe          BL       TIMER1_Init
-                  |L18.28|
-;;;522    	
-;;;523        /* Got no where to go, just loop forever */
-;;;524        while(1)
-;;;525        {
-;;;526    		UART_Loop_Process();
-00001c  f7fffffe          BL       UART_Loop_Process
 ;;;527    
-;;;528    		SPI_Master_Loop_Process();
-000020  f7fffffe          BL       SPI_Master_Loop_Process
-;;;529    
-;;;530    		Emulate_EEPROM_Process();
-000024  f7fffffe          BL       Emulate_EEPROM_Process
-000028  e7f8              B        |L18.28|
-;;;531    
-;;;532        }
-;;;533    }
+;;;528    	TIMER1_Init();
+000018  f7fffffe          BL       TIMER1_Init
+                  |L19.28|
+;;;529    	
+;;;530        /* Got no where to go, just loop forever */
+;;;531        while(1)
+;;;532        {
+;;;533    		UART_Loop_Process();
+00001c  f7fffffe          BL       UART_Loop_Process
 ;;;534    
+;;;535    		SPI_Master_Loop_Process();
+000020  f7fffffe          BL       SPI_Master_Loop_Process
+;;;536    
+;;;537    		Emulate_EEPROM_Process();
+000024  f7fffffe          BL       Emulate_EEPROM_Process
+000028  e7f8              B        |L19.28|
+;;;538    
+;;;539        }
+;;;540    }
+;;;541    
                           ENDP
 
 
@@ -1282,7 +1316,7 @@
                   set_UART_RX_Finish PROC
 ;;;73     
 ;;;74     void set_UART_RX_Finish(eUART_RX_State_Index en)
-000000  4901              LDR      r1,|L19.8|
+000000  4901              LDR      r1,|L20.8|
 ;;;75     {
 ;;;76     	g_bUART_RX_Received_Data_State = en;
 000002  7008              STRB     r0,[r1,#0]
@@ -1292,7 +1326,7 @@
                           ENDP
 
 000006  0000              DCW      0x0000
-                  |L19.8|
+                  |L20.8|
                           DCD      ||.data||
 
                           AREA ||i.set_data_flash_base||, CODE, READONLY, ALIGN=2
@@ -1319,22 +1353,22 @@
 00000c  2500              MOVS     r5,#0
 00000e  43ed              MVNS     r5,r5
 000010  2800              CMP      r0,#0                 ;101
-000012  da03              BGE      |L20.28|
-000014  a01e              ADR      r0,|L20.144|
+000012  da03              BGE      |L21.28|
+000014  a01e              ADR      r0,|L21.144|
 000016  f7fffffe          BL       __2printf
-00001a  e017              B        |L20.76|
-                  |L20.28|
+00001a  e017              B        |L21.76|
+                  |L21.28|
 ;;;105        }
 ;;;106    
 ;;;107        /* Check if Data Flash is enabled (CONFIG0[0]) and is expected address (CONFIG1) */
 ;;;108        if ((!(au32Config[0] & 0x1)) && (au32Config[1] == u32DFBA))
 00001c  9800              LDR      r0,[sp,#0]
 00001e  07c0              LSLS     r0,r0,#31
-000020  d104              BNE      |L20.44|
+000020  d104              BNE      |L21.44|
 000022  9801              LDR      r0,[sp,#4]
 000024  42a0              CMP      r0,r4
-000026  d101              BNE      |L20.44|
-                  |L20.40|
+000026  d101              BNE      |L21.44|
+                  |L21.40|
 ;;;109            return 0;
 000028  2000              MOVS     r0,#0
 ;;;110    
@@ -1370,8 +1404,8 @@
 ;;;140        return 0;
 ;;;141    }
 00002a  bd7c              POP      {r2-r6,pc}
-                  |L20.44|
-00002c  481f              LDR      r0,|L20.172|
+                  |L21.44|
+00002c  481f              LDR      r0,|L21.172|
 00002e  6801              LDR      r1,[r0,#0]            ;111
 000030  2210              MOVS     r2,#0x10              ;111
 000032  4311              ORRS     r1,r1,r2              ;111
@@ -1385,45 +1419,45 @@
 000042  4668              MOV      r0,sp                 ;117
 000044  f7fffffe          BL       FMC_WriteConfig
 000048  2800              CMP      r0,#0                 ;117
-00004a  da01              BGE      |L20.80|
-                  |L20.76|
+00004a  da01              BGE      |L21.80|
+                  |L21.76|
 00004c  4628              MOV      r0,r5                 ;118
 00004e  bd7c              POP      {r2-r6,pc}
-                  |L20.80|
+                  |L21.80|
 000050  2102              MOVS     r1,#2                 ;120
 000052  4668              MOV      r0,sp                 ;120
 000054  f7fffffe          BL       FMC_ReadConfig
 000058  9800              LDR      r0,[sp,#0]            ;123
 00005a  07c0              LSLS     r0,r0,#31             ;123
-00005c  d102              BNE      |L20.100|
+00005c  d102              BNE      |L21.100|
 00005e  9801              LDR      r0,[sp,#4]            ;123
 000060  42a0              CMP      r0,r4                 ;123
-000062  d008              BEQ      |L20.118|
-                  |L20.100|
-000064  a012              ADR      r0,|L20.176|
+000062  d008              BEQ      |L21.118|
+                  |L21.100|
+000064  a012              ADR      r0,|L21.176|
 000066  f7fffffe          BL       __2printf
 00006a  f7fffffe          BL       FMC_Close
-00006e  4918              LDR      r1,|L20.208|
+00006e  4918              LDR      r1,|L21.208|
 000070  2000              MOVS     r0,#0                 ;127
 000072  6008              STR      r0,[r1,#0]            ;127
-000074  e7ea              B        |L20.76|
-                  |L20.118|
+000074  e7ea              B        |L21.76|
+                  |L21.118|
 000076  4621              MOV      r1,r4                 ;133
-000078  a016              ADR      r0,|L20.212|
+000078  a016              ADR      r0,|L21.212|
 00007a  f7fffffe          BL       __2printf
-                  |L20.126|
+                  |L21.126|
 00007e  f7fffffe          BL       IsDebugFifoEmpty
 000082  2800              CMP      r0,#0                 ;136
-000084  d0fb              BEQ      |L20.126|
+000084  d0fb              BEQ      |L21.126|
 000086  2001              MOVS     r0,#1                 ;139
 000088  0781              LSLS     r1,r0,#30             ;139
 00008a  6088              STR      r0,[r1,#8]            ;139
-00008c  e7cc              B        |L20.40|
+00008c  e7cc              B        |L21.40|
 ;;;142    
                           ENDP
 
 00008e  0000              DCW      0x0000
-                  |L20.144|
+                  |L21.144|
 000090  0a526561          DCB      "\nRead User Config failed!\n",0
 000094  64205573
 000098  65722043
@@ -1432,9 +1466,9 @@
 0000a4  696c6564
 0000a8  210a00  
 0000ab  00                DCB      0
-                  |L20.172|
+                  |L21.172|
                           DCD      0x4000c000
-                  |L20.176|
+                  |L21.176|
 0000b0  4572726f          DCB      "Error: Program Config Failed!\n",0
 0000b4  723a2050
 0000b8  726f6772
@@ -1444,9 +1478,9 @@
 0000c8  696c6564
 0000cc  210a00  
 0000cf  00                DCB      0
-                  |L20.208|
+                  |L21.208|
                           DCD      0x40000100
-                  |L20.212|
+                  |L21.212|
 0000d4  0a536574          DCB      "\nSet Data Flash base as 0x%x.\n",0
 0000d8  20446174
 0000dc  6120466c
@@ -1467,11 +1501,11 @@
 ;;;86     	if (en)
 ;;;87     	{
 ;;;88     		BitFlag_ON(ReadBit(idx));
-000002  4b05              LDR      r3,|L21.24|
+000002  4b05              LDR      r3,|L22.24|
 000004  4082              LSLS     r2,r2,r0
 000006  78d8              LDRB     r0,[r3,#3]
 000008  2900              CMP      r1,#0                 ;86
-00000a  d002              BEQ      |L21.18|
+00000a  d002              BEQ      |L22.18|
 00000c  4302              ORRS     r2,r2,r0
 00000e  70da              STRB     r2,[r3,#3]
 ;;;89     	}
@@ -1481,14 +1515,14 @@
 ;;;93     	}
 ;;;94     }
 000010  4770              BX       lr
-                  |L21.18|
+                  |L22.18|
 000012  4390              BICS     r0,r0,r2              ;92
 000014  70d8              STRB     r0,[r3,#3]            ;92
 000016  4770              BX       lr
 ;;;95     
                           ENDP
 
-                  |L21.24|
+                  |L22.24|
                           DCD      ||.data||
 
                           AREA ||.bss||, DATA, NOINIT, ALIGN=0

@@ -162,6 +162,12 @@ void Emulate_EEPROM_Process(void)
 			Write_Data(i%DATA_FLASH_AMOUNT, incr_base + (cnt++) );
 		}
 
+		/* Disable FMC ISP function */
+		FMC_Close();
+
+		/* Lock protected registers */
+		SYS_LockReg();
+
 		/* Test Read_Data() */
 
 		for (i = 0 ; i < DATA_FLASH_AMOUNT; i ++)
@@ -185,6 +191,7 @@ void Emulate_EEPROM_Process(void)
 
 void Emulate_EEPROM(void)
 {
+    SYS_UnlockReg();
 
     /* Enable FMC ISP function */
     FMC_Open();
