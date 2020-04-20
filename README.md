@@ -5,9 +5,9 @@ update @ 2020/04/20
 
 1. Fix database offset without save into CONFIG issue 
 
--- before FMC_Open(), add SYS_UnlockReg()
+	- before FMC_Open(), add SYS_UnlockReg()
 
--- after Write_Data , following with FMC_Close() and SYS_LockReg()
+	- after Write_Data , following with FMC_Close() and SYS_LockReg()
 
 2. How to get checksum under KEILC
 
